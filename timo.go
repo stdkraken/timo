@@ -37,7 +37,7 @@ var SPLITTED_PATH = func() []string {
 	return []string{}
 }()
 
-var CURRENT_COMMAND *exec.Cmd
+var CurrentCommand *exec.Cmd
 
 func Sep() string { // get system default seperator
 	switch runtime.GOOS {
@@ -99,8 +99,24 @@ func CommandCleaner() {
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
 		go func() {
+      if CurrentCommand != nil {
+        // a process is running
+        err := CurrentCommand.Process.Signal(os.Interrupt)
+        if err != nil {
+          println("Couldn't send the interrupt signal to the process.")
+        }
+        err = CurrentCommand.Wait()
+        if err != nil {
+          println("Couldn't wait for the process to stop.")
+        }
+        CurrentCommand = nil
+      } else {
+        // no process is running
+        println()
+        os.Exit(0)
+      }
 			/*
-				if err := CURRENT_COMMAND.Process.Kill(); err != nil {
+				if err := CurrentCommand.Process.Kill(); err != nil {
 					log.Fatal("failed to kill process: ", err)
 				}
 			*/
@@ -125,6 +141,8 @@ func GenMOTD() {
 }
 
 func main() {
+  APTSearch("rust")
+  return
 	go CommandCleaner()
 	log.SetOutput(&NullOutput{})
 	tm.Clear() // Clear current screen
@@ -200,7 +218,7 @@ func main() {
 					cmd.Stdout = os.Stdout
 					cmd.Stdin = os.Stdin
 					cmd.Stderr = os.Stdout
-					CURRENT_COMMAND = cmd
+					CurrentCommand = cmd
 					// cmd.Dir = "./"
 					err = cmd.Run()
 					if err != nil {
