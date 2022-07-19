@@ -99,9 +99,11 @@ func CommandCleaner() {
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
 		go func() {
-			if err := CURRENT_COMMAND.Process.Kill(); err != nil {
-				log.Fatal("failed to kill process: ", err)
-			}
+			/*
+				if err := CURRENT_COMMAND.Process.Kill(); err != nil {
+					log.Fatal("failed to kill process: ", err)
+				}
+			*/
 		}()
 	}
 }
