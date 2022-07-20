@@ -36,6 +36,7 @@ var SPLITTED_PATH = func() []string {
 	}
 	return []string{}
 }()
+var VERSION = "0.2"
 
 var CurrentCommand *exec.Cmd
 
@@ -99,22 +100,22 @@ func CommandCleaner() {
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 		<-c
 		go func() {
-      if CurrentCommand != nil {
-        // a process is running
-        err := CurrentCommand.Process.Signal(os.Interrupt)
-        if err != nil {
-          println("Couldn't send the interrupt signal to the process.")
-        }
-        err = CurrentCommand.Wait()
-        if err != nil {
-          println("Couldn't wait for the process to stop.")
-        }
-        CurrentCommand = nil
-      } else {
-        // no process is running
-        println()
-        os.Exit(0)
-      }
+			if CurrentCommand != nil {
+				// a process is running
+				err := CurrentCommand.Process.Signal(os.Interrupt)
+				if err != nil {
+					println("Couldn't send the interrupt signal to the process.")
+				}
+				err = CurrentCommand.Wait()
+				if err != nil {
+					println("Couldn't wait for the process to stop.")
+				}
+				CurrentCommand = nil
+			} else {
+				// no process is running
+				println()
+				os.Exit(0)
+			}
 			/*
 				if err := CurrentCommand.Process.Kill(); err != nil {
 					log.Fatal("failed to kill process: ", err)
@@ -141,8 +142,6 @@ func GenMOTD() {
 }
 
 func main() {
-  APTSearch("rust")
-  return
 	go CommandCleaner()
 	log.SetOutput(&NullOutput{})
 	tm.Clear() // Clear current screen
@@ -152,7 +151,7 @@ func main() {
 	for {
 		color.Style{color.FgLightMagenta, color.OpBold}.Print("⋙ ")
 
-		inputStyle := color.Style{color.FgLightCyan}
+		inputStyle := color.Style{color.FgLightMagenta}
 		PrintColorMod(inputStyle, " ")
 
 		buffer := make([]byte, BUFFER_SIZE)
@@ -269,6 +268,11 @@ func main() {
 					}
 				}
 				println("\"? (Probably " + formattedProb + "%).")
+				if HasAptPackage(cmdName) {
+					print("You can install the package \"")
+					color.Style{color.FgBlue, color.OpBold}.Print(cmdName)
+					println("\" with apt.")
+				}
 			}
 		} else {
 			// stop timer
@@ -276,8 +280,7 @@ func main() {
 
 			dur := e.Sub(s)
 			// fmt.Println(dur.String())
-			color.Style{color.FgGreen, color.OpBold}.Print("\n✓ ")
-			fmt.Println("Done in", FloatStrLimit(dur.String(), 6)+".")
+			color.Style{color.FgGreen, color.OpBold}.Print("\n✓ "+"Done in ", FloatStrLimit(dur.String(), 6)+".\n")
 		}
 	}
 }

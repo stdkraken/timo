@@ -44,6 +44,12 @@ var TIMO_COMMANDS_LOADER = func() bool {
 				GenMOTD()
 			},
 		},
+		Command{
+			Name: "apt-check-toggle",
+			Do: func(params []string, rawInput []byte) {
+				AptPackageCheck = !AptPackageCheck
+			},
+		},
 	)
 	return true
 }()
