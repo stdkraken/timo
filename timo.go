@@ -32,11 +32,11 @@ var SPLITTED_PATH = func() []string {
 	case "windows":
 		// idk how
 	default:
-		return strings.Split(PATH, ":")
+		return append(strings.Split(PATH, ":"), "./") // add current directory to the paths
 	}
 	return []string{}
 }()
-var VERSION = "0.2"
+var VERSION = "0.2.2"
 
 var CurrentCommand *exec.Cmd
 
@@ -47,45 +47,6 @@ func Sep() string { // get system default seperator
 	default:
 		return "/"
 	}
-}
-
-func FloatStrLimit(s string, l int) string {
-	start := false
-	a := ""
-	b := ""
-	d := ""
-	for _, c := range s {
-		// check if c is non numeric
-		isNumeric := func(b rune) bool {
-			return b == '0' ||
-				b == '1' ||
-				b == '2' ||
-				b == '3' ||
-				b == '4' ||
-				b == '5' ||
-				b == '6' ||
-				b == '7' ||
-				b == '8' ||
-				b == '9'
-		}
-		if c == '.' {
-			start = true
-			d += string(c)
-			continue
-		}
-		if !isNumeric(c) {
-			b += string(c)
-			continue
-		}
-		if start && len(b)+len(a) < l {
-			b += string(c)
-		} else {
-			if len(b)+len(a) < l {
-				a += string(c)
-			}
-		}
-	}
-	return a + d + b
 }
 
 type NullOutput struct{}
@@ -141,6 +102,9 @@ func GenMOTD() {
 	motd()
 }
 
+var ShellInputFg = 0x5F
+var ShellIconFg = 0x5F
+
 func main() {
 	go CommandCleaner()
 	log.SetOutput(&NullOutput{})
@@ -148,19 +112,14 @@ func main() {
 	tm.MoveCursor(1, 1)
 	log.Println(SPLITTED_PATH)
 	GenMOTD()
+	log.Println("Launching shell.")
 	for {
-		color.Style{color.FgLightMagenta, color.OpBold}.Print("⋙ ")
+		color.Style{color.Color(ShellIconFg), color.OpBold}.Print("⋙ ")
 
-		inputStyle := color.Style{color.FgLightMagenta}
+		inputStyle := color.Style{color.Color(ShellInputFg)}
 		PrintColorMod(inputStyle, " ")
 
-		buffer := make([]byte, BUFFER_SIZE)
-		// read from os.Stdin, until err != nil or n != 0 or
-		n, err := os.Stdin.Read(buffer)
-		if err != nil {
-			log.Fatalln(err.Error())
-		}
-		buffer = BufferCut(buffer, n-1) // remove last byte, because this is 0xa, and not very helpful
+		buffer := ReadStdin()
 		log.Println(buffer)
 
 		fmt.Print("\033[0m") // reset color
@@ -192,10 +151,6 @@ func main() {
 		} else {
 			continue
 		}
-
-		log.Println("Name:", cmdName)
-		log.Println("Args:", cmdArgs)
-		log.Println("Raw:", cmdRaw)
 
 		// check local timo commands
 		wasLocal := false
@@ -256,12 +211,15 @@ func main() {
 					}
 				}
 			}
+			for _, tCommand := range TIMO_COMMANDS {
+				names = append(names, tCommand.Name)
+			}
 			cmpm := NewCmpMap(names, cmdName)
 			nearCmdName, prob := cmpm.Nearest()
 			if nearCmdName != "" {
 				print("Did you mean \"")
 				color.Style{color.FgGreen, color.OpBold}.Print(nearCmdName)
-				formattedProb := FloatStrLimit(fmt.Sprint(prob*100), 3)
+				formattedProb := fmt.Sprint(prob * 100)
 				if len(formattedProb) != 0 {
 					if formattedProb[len(formattedProb)-1] == '.' {
 						formattedProb = formattedProb[1:]
@@ -280,7 +238,7 @@ func main() {
 
 			dur := e.Sub(s)
 			// fmt.Println(dur.String())
-			color.Style{color.FgGreen, color.OpBold}.Print("\n✓ "+"Done in ", FloatStrLimit(dur.String(), 6)+".\n")
+			color.Style{color.FgGreen, color.OpBold}.Print("\n✓ "+"Done in ", DurationIntFormat(dur)+".\n")
 		}
 	}
 }

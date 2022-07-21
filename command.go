@@ -26,7 +26,7 @@ var TIMO_COMMANDS_LOADER = func() bool {
 			},
 		},
 		Command{
-			Name: "exit",
+			Name: "input-multicolor",
 			Do: func(params []string, rawInput []byte) {
 				if len(params) < 1 {
 					os.Exit(0)
@@ -48,6 +48,32 @@ var TIMO_COMMANDS_LOADER = func() bool {
 			Name: "apt-check-toggle",
 			Do: func(params []string, rawInput []byte) {
 				AptPackageCheck = !AptPackageCheck
+			},
+		},
+		Command{
+			Name: "timo",
+			Do: func(params []string, rawInput []byte) {
+
+			},
+		},
+		Command{
+			Name: "plreload", // reload all the plugins
+			Do: func(params []string, rawInput []byte) {
+				// unload the plugins => undo all the changes did by the plugins
+				UnloadPlugins()
+				LoadPlugins()
+			},
+		},
+		Command{
+			Name: "plload", // load all the plugins
+			Do: func(params []string, rawInput []byte) {
+				LoadPlugins()
+			},
+		},
+		Command{
+			Name: "plunload", // unload all the plugins
+			Do: func(params []string, rawInput []byte) {
+				UnloadPlugins()
 			},
 		},
 	)

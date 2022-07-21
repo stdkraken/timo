@@ -1,0 +1,11 @@
+{
+  "name": "Custom Command",
+  "description": "Adds a custom command to the shell",
+  "version": "1.0",
+  "main": "command.js",
+  "author": "Jann Pächnatz",
+  "authors": [
+    "Jann"
+  ],
+  "runs-in-go-routine": false
+}

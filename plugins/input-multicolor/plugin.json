@@ -1,0 +1,11 @@
+{
+  "name": "input-multicolor",
+  "description": "Changes the color of the input field after 1s and this gets applied after every click of the <ENTER> button.",
+  "version": "1.0",
+  "main": "custom.js",
+  "author": "Jann Pächnatz",
+  "authors": [
+    "Jann"
+  ],
+  "runs-in-go-routine": true
+}

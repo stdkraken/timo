@@ -1,0 +1,11 @@
+{
+  "name": "Hello World",
+  "description": "Prints out Hello World to the console.",
+  "version": "1.0",
+  "main": "main.js",
+  "author": "Jann Pächnatz",
+  "authors": [
+    "Jann"
+  ],
+  "runs-in-go-routine": false
+}
